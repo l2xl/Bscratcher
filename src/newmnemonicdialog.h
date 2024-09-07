@@ -19,12 +19,12 @@ class NewMnemonicDialog : public QDialog
     Q_OBJECT
 
     std::unique_ptr<Ui::newMnemonicDialog> ui;
-    l15::core::MnemonicParser mnemonicParser;
+    l15::core::MnemonicParser<const l15::stringvector&> mnemonicParser;
 
     std::vector<std::unique_ptr<QLineEdit>> wordEdits;
 
 public:
-    explicit NewMnemonicDialog(std::vector<std::string> wordlist, QWidget *parent = nullptr);
+    explicit NewMnemonicDialog(const l15::stringvector& wordlist, QWidget *parent = nullptr);
     ~NewMnemonicDialog();
 
     bool CheckInput() const;

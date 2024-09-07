@@ -5,8 +5,8 @@
 
 #include <ranges>
 
-NewMnemonicDialog::NewMnemonicDialog(std::vector<std::string> wordlist, QWidget *parent)
-    : QDialog(parent), ui(std::make_unique<Ui::newMnemonicDialog>()), mnemonicParser(std::move(wordlist))
+NewMnemonicDialog::NewMnemonicDialog(const l15::stringvector& wordlist, QWidget *parent)
+    : QDialog(parent), ui(std::make_unique<Ui::newMnemonicDialog>()), mnemonicParser(wordlist)
 {
     ui->setupUi(this);
 
@@ -123,7 +123,7 @@ void NewMnemonicDialog::ResetWordForm()
 
 void NewMnemonicDialog::GeneratePhrase()
 {
-    l15::core::MnemonicParser::entropy_type entropy;
+    l15::sensitive_bytevector entropy;
 
     switch(ui->wordCountSelector->currentIndex()) {
     case MLEN_12:
@@ -143,7 +143,7 @@ void NewMnemonicDialog::GeneratePhrase()
     GetStrongRandBytes(entropy);
 
     for (auto mnemonic = mnemonicParser.EncodeEntropy(entropy); auto w: std::views::zip(mnemonic, wordEdits)) {
-        w.second->setText(QString::fromStdString(w.first));
+        w.second->setText(QString::fromUtf8(w.first.c_str(), w.first.length()));
     }
 
     CheckInput();

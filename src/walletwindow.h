@@ -6,6 +6,8 @@
 #include <QMainWindow>
 #include "newmnemonicdialog.h"
 
+#include "config.hpp"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class WalletWindow;
@@ -16,18 +18,21 @@ class WalletWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
-    WalletWindow(QWidget *parent = nullptr);
-    ~WalletWindow();
+    std::shared_ptr<bscratcher::Config> mConfig;
 
-private:
     std::unique_ptr<Ui::WalletWindow> ui;
     std::unique_ptr<NewMnemonicDialog> newMnemonicDlg;
 
     std::unique_ptr<QMenu> walletMenu;
-
     std::unique_ptr<QAction> addMnemonic;
 
-    void AddMemonicDialog();
+    std::unique_ptr<QDockWidget> passwordDock;
+
+public:
+    WalletWindow(std::shared_ptr<bscratcher::Config> config, QWidget *parent = nullptr);
+    ~WalletWindow() override;
+
+private:
+    void RequestWalletPassword();
 };
 #endif // WALLETWINDOW_H

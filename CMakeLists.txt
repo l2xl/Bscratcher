@@ -18,50 +18,43 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets LinguistTools)
 
 set(TS_FILES scratcher_en_US.ts)
 
 set(PROJECT_SOURCES
-        main.cpp
-        walletwindow.cpp
-        walletwindow.h
-        newmnemonicdialog.h
-        newmnemonicdialog.cpp
-        newmnemonicdialog.ui
+        src/main.cpp
+        src/walletwindow.cpp
+        src/walletwindow.h
+        src/walletwindow.ui
+        src/newmnemonicdialog.h
+        src/newmnemonicdialog.cpp
+        src/newmnemonicdialog.ui
+        src/mnemonicwordlist.hpp
+        src/mnemonicwordlist.cpp
+        src/wallet/wallet.cpp
+        src/wallet/wallet.hpp
+        src/config.cpp
+        src/config.hpp
         ${TS_FILES}
-        mnemonicwordlist.hpp
-        mnemonicwordlist.cpp
+        src/storage/secret_store.cpp
+        src/storage/secret_store.hpp
+        src/wallet/words.hpp
+        src/wallet/words/en.cpp
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(Bscratcher
+qt_add_executable(Bscratcher
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+)
 
-    )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET scratcher APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 
-    qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
-else()
-    if(ANDROID)
-        add_library(bscratcher SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(Bscratcher
-            ${PROJECT_SOURCES}
-        )
-    endif()
-
-    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
-endif()
+qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
 
 add_dependencies(Bscratcher libl15)
@@ -69,12 +62,21 @@ target_link_libraries(Bscratcher PRIVATE Qt${QT_VERSION_MAJOR}::Widgets l15)
 
 target_link_directories(Bscratcher PRIVATE ${L15_PREFIX}/lib)
 include_directories(
+        src
+        src/storage
+        src/wallet
+        ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/contrib
         ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/contrib/cex
         ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/src/common
         ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/src/core
         ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/node/src/secp256k1/include
         ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/node/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/node/src/consensus
+        ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/node/src/policy
+        ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/node/src/primitives
+        ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/node/src/script
         ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/node/src/support
+        ${CMAKE_CURRENT_SOURCE_DIR}/l15-core/node/src/crypto
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -98,6 +100,4 @@ install(TARGETS Bscratcher
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(Bscratcher)
-endif()
+qt_finalize_executable(Bscratcher)

@@ -4,9 +4,15 @@
 #include <QLocale>
 #include <QTranslator>
 
+#include "config.hpp"
+
+using namespace bscratcher;
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    auto config = std::make_shared<Config>(argc, argv);
+
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
@@ -17,7 +23,7 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    WalletWindow w;
+    WalletWindow w(config);
     w.show();
     return a.exec();
 }
