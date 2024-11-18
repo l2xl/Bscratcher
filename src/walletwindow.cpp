@@ -27,30 +27,51 @@ WalletWindow::WalletWindow(std::shared_ptr<bscratcher::Config> conf, QWidget *pa
     walletMenu.reset(menuBar()->addMenu(tr("Wallet")));
     walletMenu->addAction(addMnemonic.get());
 
-    RequestWalletPassword();
-}
-
-WalletWindow::~WalletWindow() {}
-
-void WalletWindow::RequestWalletPassword()
-{
-    if (passwordDock) throw std::runtime_error("Password is already requesting!");
-
     passwordDock = std::make_unique<QDockWidget>();
     passwordDock->setAllowedAreas(Qt::TopDockWidgetArea);
     passwordDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
 
     std::unique_ptr<QWidget> dockContainer = std::make_unique<QWidget>(passwordDock.get());
-    std::unique_ptr<QHBoxLayout> passwordLayout = std::make_unique<QHBoxLayout>(dockContainer.get());
+    dockContainer->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
+    std::unique_ptr<QHBoxLayout> passwordLayout = std::make_unique<QHBoxLayout>();
 
-    passwordLayout->addWidget(new QLabel(tr("Wallet password:"), nullptr));
+    std::unique_ptr<QLabel> label = std::make_unique<QLabel>(tr("Wallet password:"));
+    label->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    passwordLayout->addWidget(label.release());
 
-    std::unique_ptr<QLineEdit> passwordEdit = std::make_unique<QLineEdit>(nullptr);
+    passwordEdit = std::make_unique<QLineEdit>(nullptr);
     passwordEdit->setEchoMode(QLineEdit::EchoMode::Password);
-    passwordLayout->addWidget(passwordEdit.release());
+    passwordEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
+    passwordLayout->addWidget(passwordEdit.get());
+
+    passwordBtn = std::make_unique<QPushButton>(tr("Unlock"));
+    passwordBtn->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    passwordLayout->addWidget(passwordBtn.get());
+
+    dockContainer->setLayout(passwordLayout.release());
 
     passwordDock->setWidget(dockContainer.release());
+    passwordDock->widget()->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
 
     addDockWidget(Qt::TopDockWidgetArea, passwordDock.get());
+
+    connect(passwordBtn.get(), &QPushButton::pressed, this, &WalletWindow::requestUnlock);
 }
+
+WalletWindow::~WalletWindow() {}
+
+void WalletWindow::requestWalletPassword() const
+{
+    if (passwordDock->isVisible()) throw std::runtime_error("Password is already requesting!");
+
+    passwordEdit->clear();
+    passwordDock->show();
+
+}
+
+void WalletWindow::requestUnlock() const
+{
+    passwordDock->hide();
+}
+
 

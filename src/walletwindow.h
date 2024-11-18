@@ -8,11 +8,9 @@
 
 #include "config.hpp"
 
-QT_BEGIN_NAMESPACE
 namespace Ui {
 class WalletWindow;
 }
-QT_END_NAMESPACE
 
 class WalletWindow : public QMainWindow
 {
@@ -27,12 +25,16 @@ class WalletWindow : public QMainWindow
     std::unique_ptr<QAction> addMnemonic;
 
     std::unique_ptr<QDockWidget> passwordDock;
+    std::unique_ptr<QLineEdit> passwordEdit;
+    std::unique_ptr<QPushButton> passwordBtn;
 
 public:
     WalletWindow(std::shared_ptr<bscratcher::Config> config, QWidget *parent = nullptr);
     ~WalletWindow() override;
 
 private:
-    void RequestWalletPassword();
+    void requestWalletPassword() const;
+
+    void requestUnlock() const;
 };
 #endif // WALLETWINDOW_H
