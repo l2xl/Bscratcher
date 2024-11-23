@@ -19,8 +19,6 @@ class Config {
     std::string mDataDir;
     chainmode m_chain = chainmode::MAINNET;
 
-    void parse_chain_mode(const std::string& val);
-
 public:
     Config() = delete;
     Config(int argc, const char *const argv[]);
